@@ -1,8 +1,8 @@
-# Tandem - Couples Finance Splitter
+# Tandem - Splitwise for couples
 
 🚀 **[Try it live here!](https://meetdeng.github.io/tandem)**
 
-A simple tool for couples to split shared expenses from bank/credit card statements.
+A simple tool for couples to upload, categorize, and view your split expenses from bank/credit card statements.
 
 ## How to use:
 1. Enter both partner names
