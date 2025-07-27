@@ -1,6 +1,6 @@
 # Tandem - Couples Finance Splitter
 
-🚀 **[Try it live here!](https://[username].github.io/tandem)**
+🚀 **[Try it live here!](https://meetdeng.github.io/tandem)**
 
 A simple tool for couples to split shared expenses from bank/credit card statements.
 
