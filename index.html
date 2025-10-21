@@ -58,10 +58,22 @@
             margin-bottom: 56px;
             padding: 40px 0;
             border-bottom: 1px solid #d2d2d7;
+            scroll-margin-top: 20px;
         }
 
         .section:last-child {
             border-bottom: none;
+        }
+
+        .section.completed {
+            border-left: 4px solid #0071e3;
+            background: #f8f9ff;
+        }
+
+        .section.completed h2::after {
+            content: " ✓";
+            color: #0071e3;
+            font-weight: normal;
         }
 
         .section h2 {
@@ -90,21 +102,6 @@
 
         html {
             scroll-behavior: smooth;
-        }
-
-        .section {
-            scroll-margin-top: 20px;
-        }
-
-        .section.completed {
-            border-left: 4px solid #0071e3;
-            background: #f8f9ff;
-        }
-
-        .section.completed h2::after {
-            content: " ✓";
-            color: #0071e3;
-            font-weight: normal;
         }
 
         input,
@@ -918,32 +915,41 @@
     </div>
 
     <script>
-        // Global variables
+        // ===========================
+        // GLOBAL VARIABLES
+        // ===========================
         let transactions = [];
         let categories = {};
         let discoveredCategories = new Set();
         let isManualCategoryUpdate = false;
         let isSliderUpdate = false;
 
-        // Initialize
+        // ===========================
+        // INITIALIZATION
+        // ===========================
         document.addEventListener('DOMContentLoaded', function () {
             setupFileUpload();
             setupPartnerNameUpdates();
+            addBulkUpdateStyles();
         });
+
+        // ===========================
+        // UTILITY FUNCTIONS
+        // ===========================
         function scrollToSection(sectionId) {
-    console.log('scrollToSection called with:', sectionId);
-    const section = document.getElementById(sectionId);
-    if (section) {
-        console.log('Section found, scrolling...');
-        section.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start',
-            inline: 'nearest'
-        });
-    } else {
-        console.error('Section not found:', sectionId);
-    }
-}
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start',
+                    inline: 'nearest'
+                });
+            }
+        }
+
+        // ===========================
+        // PARTNER NAME MANAGEMENT
+        // ===========================
         function setupPartnerNameUpdates() {
             const partner1Input = document.getElementById('partner1');
             const partner2Input = document.getElementById('partner2');
@@ -981,14 +987,15 @@
             if (partner2Header) partner2Header.textContent = partner2Name;
         }
 
-        // File upload setup - CSV only
+        // ===========================
+        // FILE UPLOAD AND PROCESSING
+        // ===========================
         function setupFileUpload() {
             const fileUpload = document.getElementById('fileUpload');
             const fileInput = document.getElementById('fileInput');
 
             // Simple click handler
             fileUpload.onclick = function () {
-                console.log('Upload area clicked, opening file dialog'); // Debug
                 fileInput.click();
             };
 
@@ -1005,7 +1012,6 @@
                 e.preventDefault();
                 fileUpload.classList.remove('dragover');
                 const file = e.dataTransfer.files[0];
-                console.log('File dropped:', file); // Debug
                 if (file) {
                     handleFile(file);
                 }
@@ -1013,7 +1019,6 @@
 
             fileInput.onchange = function (e) {
                 const file = e.target.files[0];
-                console.log('File selected:', file); // Debug
                 if (file) {
                     handleFile(file);
                 }
@@ -1058,15 +1063,11 @@
         }
 
         function processCSV(file) {
-            console.log('Processing CSV file:', file.name, 'Size:', file.size);
             const reader = new FileReader();
             reader.onload = function (e) {
-                console.log('File read successfully, content length:', e.target.result.length);
-                console.log('First 500 characters:', e.target.result.substring(0, 500));
                 parseTransactions(e.target.result);
             };
             reader.onerror = function (e) {
-                console.error('Error reading file:', e);
                 alert('Error reading the CSV file. Please try again.');
             };
             reader.readAsText(file);
@@ -1175,6 +1176,9 @@
             return mapping;
         }
 
+        // ===========================
+        // TRANSACTION CATEGORIZATION
+        // ===========================
         function enhancedCategorizeTransaction(description, creditCardCategory) {
             if (creditCardCategory) {
                 const mapped = mapCreditCardCategory(creditCardCategory);
@@ -1381,6 +1385,9 @@
             return 'Uncategorized (Default)';
         }
 
+        // ===========================
+        // CATEGORY MANAGEMENT
+        // ===========================
         function showCategorySection() {
             initializeCategoriesFromData();
             document.getElementById('categorySection').classList.remove('hidden');
@@ -1690,6 +1697,9 @@
             }
         }
 
+        // ===========================
+        // TRANSACTION DISPLAY
+        // ===========================
         function proceedToTransactionReview() {
     // Update categories
     updateCategories();
@@ -1726,15 +1736,11 @@
 }
 
         function displayTransactions() {
-            console.log('displayTransactions called');
-            console.log('Transactions to display:', transactions);
-
             const expensesBody = document.getElementById('expensesBody');
             const creditsBody = document.getElementById('creditsBody');
             const noCreditsMessage = document.getElementById('noCreditsMessage');
 
             if (!expensesBody || !creditsBody) {
-                console.error('Transaction table elements not found');
                 return;
             }
 
@@ -1785,25 +1791,6 @@
             } else {
                 noCreditsMessage.innerHTML = 'No credits or refunds found in this statement.';
                 noCreditsMessage.style.display = 'block';
-            }
-
-            function proceedToTransactionReview() {
-                updateCategories();
-
-                transactions.forEach(transaction => {
-                    if (!transaction.manuallyEdited) {
-                        const categoryData = categories[transaction.category] || categories['Uncategorized (Default)'];
-                        transaction.partner1Percent = categoryData.partner1;
-                        transaction.partner2Percent = categoryData.partner2;
-                    }
-                });
-
-                displayTransactions();
-
-                // Always scroll when the button is clicked
-                setTimeout(() => {
-                    scrollToSection('transactionSection');
-                }, 100);
             }
         }
         function updateTableHeaders(tableId, partner1Possessive, partner2Possessive) {
@@ -1887,6 +1874,10 @@
 
             return false;
         }
+
+        // ===========================
+        // CREDIT CARD PAYMENT DETECTION
+        // ===========================
         function isCreditCardBillPayment(description) {
             const desc = description.toLowerCase().trim();
 
@@ -1937,6 +1928,10 @@
             // Check if description contains any bill payment patterns
             return billPaymentPatterns.some(pattern => desc.includes(pattern));
         }
+
+        // ===========================
+        // TRANSACTION UPDATES
+        // ===========================
         function updateTransactionCategory(index, category) {
             // Set flag to indicate this is a manual update
             isManualCategoryUpdate = true;
@@ -2032,6 +2027,9 @@
             return normalized.replace(/\b\w/g, l => l.toUpperCase());
         }
 
+        // ===========================
+        // UI FEEDBACK
+        // ===========================
         function showBulkUpdateMessage(count, vendorName, category) {
             // Remove any existing message
             const existingMessage = document.getElementById('bulk-update-message');
@@ -2087,13 +2085,6 @@
                 document.head.appendChild(style);
             }
         }
-
-        // Initialize the styles when the page loads
-        document.addEventListener('DOMContentLoaded', function () {
-            setupFileUpload();
-            setupPartnerNameUpdates();
-            addBulkUpdateStyles();
-        });
 
         function updateTransactionCategoryDropdowns() {
             const transactionSection = document.getElementById('transactionSection');
@@ -2174,6 +2165,9 @@
             isManualCategoryUpdate = false; // Reset flag
         }
 
+        // ===========================
+        // SUMMARY AND CALCULATIONS
+        // ===========================
         function calculateSplit() {
             updateCategories();
 
@@ -2240,6 +2234,7 @@
                 section.classList.add('completed');
             }
         }
+
         function populateSummaryTable(categoryBreakdown, totalAmount, partner1Total, partner2Total) {
             const tbody = document.getElementById('summaryTableBody');
             tbody.innerHTML = '';
@@ -2268,6 +2263,10 @@
             document.getElementById('summaryPartner1Total').innerHTML = `<strong>$${partner1Total.toFixed(2)}</strong>`;
             document.getElementById('summaryPartner2Total').innerHTML = `<strong>$${partner2Total.toFixed(2)}</strong>`;
         }
+
+        // ===========================
+        // EXPORT FUNCTIONALITY
+        // ===========================
         function exportCompleteReport() {
             if (!transactions || transactions.length === 0) {
                 alert('No transactions to export. Please upload a CSV file and review transactions first.');
